@@ -7,7 +7,7 @@ clc;
 
 %% Step 1: Read and Process Audio Signal
 % Read the audio file
-[m_t, Fs_original] = audioread('eric.wav'); % Replace with your audio file name
+[m_t, Fs_original] = audioread('eric.wav');
 m_t = m_t(:,1); % Take only one channel if stereo
 t_original = (0:length(m_t)-1)/Fs_original;
 

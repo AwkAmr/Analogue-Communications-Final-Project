@@ -1,4 +1,8 @@
-% Step 1: Read audio file
+clear;
+clc;
+close all;
+
+%% Step 1: Read audio file
 [m, Fs] = audioread('eric.wav');
 m = m(:,1); % Ensure mono
 t = (0:length(m)-1)/Fs;
@@ -16,14 +20,14 @@ title('Original Audio Spectrum');
 grid on;
 
 
-% Step 2: Ideal LPF (4 kHz)
+%% Step 2: Ideal LPF (4 kHz)
 BW = 4000;
 H = abs(f) <= BW;
 
 M_filt_f = M_f .* H;
 
 
-% Step 3: Time-domain signal
+%% Step 3: Time-domain signal
 m_filt = real(ifft(ifftshift(M_filt_f)));
 
 figure;
@@ -34,10 +38,10 @@ title('Filtered Message Signal (Time Domain)');
 
 disp('Step 3: Filtered baseband message');
 sound(m_filt, Fs);
-pause;
+pause(length(m_filt)/Fs + 1);
 
 
-% Step 4: DSB-SC Modulation
+%% Step 4: DSB-SC Modulation
 Fc = 100e3;
 Fs_mod = 5*Fc;
 
@@ -61,7 +65,7 @@ title('DSB-SC Spectrum');
 grid on;
 
 
-% Step 5: Ideal SSB (LSB)
+%% Step 5: Ideal SSB (LSB)
 H_ssb = (f2 <= Fc) & (f2 >= Fc-BW);
 H_ssb = H_ssb | ((f2 >= -Fc) & (f2 <= -Fc+BW));
 
@@ -76,7 +80,7 @@ title('SSB-LSB Spectrum (Ideal Filter)');
 grid on;
 
 
-% Step 6: Coherent Detection
+%% Step 6: Coherent Detection
 rx = ssb .* (2*cos(2*pi*Fc*t_mod));
 
 RX_f = fftshift(fft(rx));
@@ -94,10 +98,10 @@ title('Recovered Message (Ideal Coherent Detection)');
 m_rec_audio = resample(m_rec, Fs, Fs_mod);  % resample audio to be able to play it
 disp('Step 6: Recovered message (ideal coherent detection)');
 sound(m_rec_audio, Fs);
-pause;
+pause(length(m_rec_audio)/Fs + 1);
 
 
-% Step 7: Butterworth Filter
+%% Step 7: Butterworth Filter
 [b,a] = butter(4, BW/(Fs_mod/2));
 m_rec_butter = filter(b,a,rx);
 
@@ -110,10 +114,10 @@ title('Recovered Message (Butterworth Filter)');
 m_rec_butter_audio = resample(m_rec_butter, Fs, Fs_mod);
 disp('Step 7: Recovered message (Butterworth filter)');
 sound(m_rec_butter_audio, Fs);
-pause;
+pause(length(m_rec_butter_audio)/Fs + 1);
 
 
-% Step 8: Noise Effect
+%% Step 8: Noise Effect
 SNRs = [0 10 30];
 
 for i = 1:length(SNRs)
@@ -134,11 +138,11 @@ for i = 1:length(SNRs)
     m_n_audio = resample(m_n, Fs, Fs_mod);
     disp(['Step 8: Recovered message with SNR = ', num2str(SNRs(i)), ' dB']);
     sound(m_n_audio, Fs);
-    pause;
+    pause(length(m_n_audio)/Fs + 1);
 end
 
 
-% Step 9: SSB-TC
+%% Step 9: SSB-TC
 A = 2*max(abs(m_resampled));
 ssb_tc = ssb + A*cos(2*pi*Fc*t_mod);
 
@@ -158,4 +162,4 @@ title('Recovered Message (Envelope Detection)');
 env_audio = resample(env_rec, Fs, Fs_mod);
 disp('Step 9: Envelope detected message (SSB-TC)');
 sound(env_audio, Fs);
-pause;
+pause(length(env_audio)/Fs + 1);
