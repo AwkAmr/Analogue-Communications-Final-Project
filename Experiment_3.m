@@ -1,6 +1,5 @@
 %% Analog Communication - Experiment 3: NBFM (Narrowband Frequency Modulation)
 % This script implements narrowband FM modulation and demodulation
-
 clear all;
 close all;
 clc;
@@ -9,35 +8,35 @@ clc;
 % Read the audio file
 [m_t, Fs_original] = audioread('eric.wav');
 m_t = m_t(:,1); % Take only one channel if stereo
-t_original = (0:length(m_t)-1)/Fs_original;
+t_original = (0:length(m_t)-1)/Fs_original; % Time vector
 
 % Plot original signal in time domain
 figure('Name', 'Original Audio Signal');
 subplot(2,1,1);
-plot(t_original, m_t);
+plot(t_original, m_t); % Plot amplitude vs time
 title('Original Audio Signal - Time Domain');
 xlabel('Time (s)');
 ylabel('Amplitude');
 grid on;
 
 % Compute spectrum of original signal
-M_f = fftshift(fft(m_t));
-freq_original = linspace(-Fs_original/2, Fs_original/2, length(M_f));
+M_f = fftshift(fft(m_t)); % FFT and shift zero frequency to center
+freq_original = linspace(-Fs_original/2, Fs_original/2, length(M_f)); % Frequency axis
 
 subplot(2,1,2);
-plot(freq_original/1000, abs(M_f));
+plot(freq_original/1000, abs(M_f)); % Plot magnitude spectrum in kHz
 title('Original Audio Signal - Frequency Domain');
 xlabel('Frequency (kHz)');
 ylabel('Magnitude');
 grid on;
-xlim([-10 10]);
+xlim([-10 10]); % Focus on main frequency components
 
 %% Step 2: Band-limit the signal to 4 kHz using ideal filter
 % Create ideal low-pass filter (frequency domain)
-cutoff_freq = 4000; % 4 kHz
-ideal_filter = (abs(freq_original) <= cutoff_freq)';
+cutoff_freq = 4000; % 4 kHz cutoff
+ideal_filter = (abs(freq_original) <= cutoff_freq)'; % Logical mask
 
-% Apply filter in frequency domain
+% Apply filter in frequency domain (element-wise multiplication)
 M_f_filtered = M_f .* ideal_filter;
 
 % Plot filtered spectrum
@@ -51,7 +50,7 @@ grid on;
 xlim([-10 10]);
 
 %% Step 3: Convert back to time domain
-m_t_filtered = real(ifft(ifftshift(M_f_filtered)));
+m_t_filtered = real(ifft(ifftshift(M_f_filtered))); % Inverse FFT and take real part
 
 subplot(2,1,2);
 plot(t_original, m_t_filtered);
@@ -62,17 +61,17 @@ grid on;
 
 %% Step 4: Play the filtered audio
 fprintf('Playing filtered audio...\n');
-sound(m_t_filtered, Fs_original);
-pause(length(m_t_filtered)/Fs_original + 1);
+sound(m_t_filtered, Fs_original); % Play audio at original sampling rate
+pause(length(m_t_filtered)/Fs_original + 1); % Wait until audio finishes
 
 %% Step 5: Resample for modulation
 % Set carrier frequency and new sampling frequency
-fc = 100e3; % 100 kHz carrier frequency
-Fs_new = 5 * fc; % Fs = 5*fc = 500 kHz
+fc = 100e3; % Carrier frequency 100 kHz
+Fs_new = 5 * fc; % New sampling rate 5*fc = 500 kHz to satisfy Nyquist
 
-% Resample the filtered signal
+% Resample the filtered signal to new sampling rate
 m_t_resampled = resample(m_t_filtered, Fs_new, Fs_original);
-t_new = (0:length(m_t_resampled)-1)/Fs_new;
+t_new = (0:length(m_t_resampled)-1)/Fs_new; % New time vector
 
 fprintf('Original Fs: %d Hz\n', Fs_original);
 fprintf('New Fs: %d Hz\n', Fs_new);
@@ -82,9 +81,9 @@ fprintf('Carrier Fc: %d Hz\n', fc);
 % NBFM Theory:
 % For NBFM, the modulation index β must be << 1 (typically β < 0.3)
 % s_FM(t) = Ac*cos(2πfc*t + 2π*kf*∫m(τ)dτ)
-% For NBFM: s_NBFM(t) ≈ Ac*cos(2πfc*t) - Ac*β*m(t)*sin(2πfc*t)
+% For NBFM (β << 1): s_NBFM(t) ≈ Ac*cos(2πfc*t) - Ac*β*m(t)*sin(2πfc*t)
 
-% Normalize message signal
+% Normalize message signal to [-1,1]
 m_t_norm = m_t_resampled / max(abs(m_t_resampled));
 
 % Set frequency deviation (choose small value for NBFM)
@@ -95,7 +94,7 @@ delta_f = 750; % Frequency deviation in Hz
 kf = 2 * pi * delta_f; % Frequency sensitivity constant
 
 % Calculate modulation index
-beta = delta_f / cutoff_freq;
+beta = delta_f / cutoff_freq; % β = Δf / fm
 fprintf('Modulation Index β = %.4f\n', beta);
 fprintf('For NBFM, β should be < 0.3. Current β = %.4f\n', beta);
 
@@ -103,7 +102,7 @@ if beta >= 0.3
     warning('β >= 0.3! This is approaching wideband FM.');
 end
 
-% Generate carrier
+% Generate carrier signal
 carrier = cos(2*pi*fc*t_new');
 
 % Generate NBFM signal using INTEGRAL METHOD (proper FM generation)
@@ -112,9 +111,9 @@ m_integral = cumsum(m_t_norm) / Fs_new;
 
 % FM signal: s(t) = Ac*cos(2πfc*t + 2π*kf*∫m(τ)dτ)
 Ac = 1; % Carrier amplitude
-s_nbfm = Ac * cos(2*pi*fc*t_new' + kf * m_integral);
+s_nbfm = Ac * cos(2*pi*fc*t_new' + kf * m_integral); % FM signal
 
-% Plot NBFM signal in time domain
+% Plot NBFM signal in time domain (first 1000 samples)
 figure('Name', 'NBFM Signal - Time Domain');
 plot(t_new(1:1000), s_nbfm(1:1000));
 title('NBFM Modulated Signal - Time Domain (First 1000 samples)');
@@ -123,8 +122,8 @@ ylabel('Amplitude');
 grid on;
 
 %% Step 7: Plot NBFM Spectrum
-S_nbfm = fftshift(fft(s_nbfm));
-freq_new = linspace(-Fs_new/2, Fs_new/2, length(S_nbfm));
+S_nbfm = fftshift(fft(s_nbfm)); % FFT and shift zero frequency
+freq_new = linspace(-Fs_new/2, Fs_new/2, length(S_nbfm)); % Frequency axis
 
 figure('Name', 'NBFM Signal - Frequency Domain');
 plot(freq_new/1000, abs(S_nbfm));
@@ -195,7 +194,7 @@ m_demod = envelope - dc_level;
 % Low-pass filter to remove high-frequency components
 % Design ideal LPF at message bandwidth (4 kHz)
 M_demod_freq = fftshift(fft(m_demod));
-lpf = (abs(freq_new) <= cutoff_freq)';
+lpf = (abs(freq_new) <= cutoff_freq)'; % Ideal LPF
 M_demod_filtered = M_demod_freq .* lpf;
 m_demod_filtered = real(ifft(ifftshift(M_demod_filtered)));
 
@@ -234,7 +233,6 @@ grid on;
 % Compute spectra for comparison
 M_orig_freq = fftshift(fft(m_t_filtered));
 M_recv_freq = fftshift(fft(m_received));
-
 subplot(2,1,2);
 plot(freq_original/1000, abs(M_orig_freq)/max(abs(M_orig_freq)));
 hold on;
