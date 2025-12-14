@@ -36,6 +36,16 @@ xlim([-10 10]); % Focus on main frequency components
 cutoff_freq = 4000; % 4 kHz cutoff
 ideal_filter = (abs(freq_original) <= cutoff_freq)'; % Logical mask
 
+% plot the ideal filter
+figure('Name', 'Ideal Low-Pass Filter');
+plot(freq_original/1000, ideal_filter);
+title(['Ideal Low-Pass Filter (Cutoff = ', num2str(cutoff_freq/1000), ' kHz)']);
+xlabel('Frequency (kHz)');
+ylabel('Magnitude');
+grid on;
+ylim([-0.1 1.1]); % To clearly show 0 and 1
+xlim([-10 10]);
+
 % Apply filter in frequency domain (element-wise multiplication)
 M_f_filtered = M_f .* ideal_filter;
 
