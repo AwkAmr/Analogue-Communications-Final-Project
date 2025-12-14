@@ -206,6 +206,7 @@ ylabel('Amplitude');
 grid on;
 
 % Normalize demodulated signal
+% Normalize to 1 for easier scaling later
 m_demod_norm = m_demod_filtered / max(abs(m_demod_filtered));
 
 % Downsample back to original sampling frequency for playback
@@ -218,12 +219,19 @@ else
     m_received = [m_received; zeros(length(m_t_filtered)-length(m_received), 1)];
 end
 
+%% FIX FOR VOLUME CONSISTENCY
+% To make the received signal sound the same volume as the filtered input 
+% message, we scale the output by the peak amplitude of the input 
+% message signal (m_t_filtered) used for modulation.
+m_received = m_received * max(abs(m_t_filtered));
+
 %% Step 10: Compare original and demodulated signals
 figure('Name', 'Comparison: Original vs Demodulated');
 subplot(2,1,1);
+% Normalize both signals to their peak for shape comparison in plot
 plot(t_original, m_t_filtered/max(abs(m_t_filtered)));
 hold on;
-plot(t_original, m_received);
+plot(t_original, m_received/max(abs(m_received))); 
 title('Original (blue) vs Demodulated (orange) Signal');
 xlabel('Time (s)');
 ylabel('Normalized Amplitude');
@@ -234,6 +242,7 @@ grid on;
 M_orig_freq = fftshift(fft(m_t_filtered));
 M_recv_freq = fftshift(fft(m_received));
 subplot(2,1,2);
+% Plot normalized spectra for comparison
 plot(freq_original/1000, abs(M_orig_freq)/max(abs(M_orig_freq)));
 hold on;
 plot(freq_original/1000, abs(M_recv_freq)/max(abs(M_recv_freq)));
@@ -246,7 +255,8 @@ grid on;
 
 %% Step 11: Play demodulated audio
 fprintf('\nPlaying demodulated audio...\n');
-sound(m_received, Fs_original);
+sound(m_received, Fs_original); 
+% The volume should now match the filtered message due to the scaling fix.
 
 %% Summary and Conclusions
 fprintf('\n========== EXPERIMENT 3 SUMMARY ==========\n');
