@@ -161,9 +161,9 @@ fprintf('Where:\n');
 fprintf('  Δf = frequency deviation = kf*max(|m(t)|)/(2π)\n');
 fprintf('  fm = maximum message frequency\n');
 if beta < 0.3
-    fprintf('Current β = %.4f ✓ (NBFM satisfied)\n', beta);
+    fprintf('Current β = %.4f (NBFM satisfied)\n', beta);
 else
-    fprintf('Current β = %.4f ✗ (Not NBFM)\n', beta);
+    fprintf('Current β = %.4f (Not NBFM)\n', beta);
 end
 
 %% Step 9: Demodulate NBFM using Differentiator + Envelope Detector
@@ -233,7 +233,7 @@ end
 % To make the received signal sound the same volume as the filtered input 
 % message, we scale the output by the peak amplitude of the input 
 % message signal (m_t_filtered) used for modulation.
-m_received = m_received * max(abs(m_t_filtered));
+m_received = m_received * 0.6 / max(abs(m_received));
 
 %% Step 10: Compare original and demodulated signals
 figure('Name', 'Comparison: Original vs Demodulated');
