@@ -87,7 +87,7 @@ fprintf('Original Fs: %d Hz\n', Fs_original);
 fprintf('New Fs: %d Hz\n', Fs_new);
 fprintf('Carrier Fc: %d Hz\n', fc);
 
-%% Step 6: Generate NBFM Signal
+%% Step 6: Generate NBFM Signal     
 % NBFM Theory:
 % For NBFM, the modulation index β must be << 1 (typically β < 0.3)
 % s_FM(t) = Ac*cos(2πfc*t + 2π*kf*∫m(τ)dτ)
@@ -147,10 +147,10 @@ xlim([95 105]); % Focus on carrier region (100 kHz ± 5 kHz)
 fprintf('\n--- Observation of NBFM Spectrum ---\n');
 fprintf('The NBFM spectrum shows:\n');
 fprintf('1. A dominant carrier component at fc = 100 kHz\n');
-fprintf('2. Sidebands around the carrier (similar to DSB-SC pattern)\n');
+fprintf('2. Sidebands around the carrier');
 fprintf('3. Multiple frequency components due to FM modulation\n');
 fprintf('4. For NBFM with small β, spectrum resembles AM/DSB\n');
-fprintf('5. Approximate bandwidth ≈ 2*(Δf + fm) = 2*(%.1f + 4) = %.1f kHz (Carson''s Rule)\n', delta_f/1000, 2*(delta_f+cutoff_freq)/1000);
+fprintf('5. Approximate bandwidth ≈ 2*(Δf + fm) = 2*(%.1f + 4) = %.1f kHz\n', delta_f/1000, 2*(delta_f+cutoff_freq)/1000);
 fprintf('6. The "hill" shape shows the distribution of energy across frequencies\n');
 
 %% Step 8: Answer to Question 3 - Condition for NBFM
